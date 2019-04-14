@@ -19,9 +19,9 @@ class AntibacterialTherapy extends Component {
                 <FormControlLabel
                     control={
                         <Switch
-                            checked={exclusions.has(Exc.antibac)}
-                            onChange={() => this.exclusionToggle(Exc.antibac)}
+                            checked={exclusions.has(Exc.LessThanEqual_24_Hours_Antibacterial_Therapy[0])}
                             value="Participation in other clinical trial"
+                            onChange={() => this.exclusionToggle(Exc.LessThanEqual_24_Hours_Antibacterial_Therapy[1])}
                         />
                     }
                     label="> 24 hours Prior Antibacterial Therapy"

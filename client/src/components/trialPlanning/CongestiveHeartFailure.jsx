@@ -28,19 +28,19 @@ class CongestiveHeartFailure extends Component {
                 <FormControlLabel
                     control={
                         <Switch
-                            checked={exclusions.has(Exc.chf)}
-                            onChange={() => this.exclusionToggle(Exc.chf)}
+                            checked={exclusions.has(Exc.Congestive_Heart_Failure[0])}
+                            onChange={() => this.exclusionToggle(Exc.Congestive_Heart_Failure[1])}
                             value="Congestive Heart Failure"
                         />
                     }
                     label="Congestive Heart Failure"
                 />
-                <Collapse in={exclusions.has(Exc.chf)} classes={{wrapper: classes.wrapper}}>
+                <Collapse in={exclusions.has(Exc.Congestive_Heart_Failure[0])} classes={{wrapper: classes.wrapper}}>
                     <FormControlLabel
                         control={
                             <Checkbox
-                                checked={exclusions.has(Exc.nyha) && exclusions.has(Exc.chf)}
-                                onChange={() => this.exclusionToggle(Exc.nyha)}
+                                checked={exclusions.has(Exc.NYHA_Class_IV[0]) && exclusions.has(Exc.Congestive_Heart_Failure[0])}
+                                onChange={() => this.exclusionToggle(Exc.NYHA_Class_IV[1])}
                                 value="NYHA Class IV or CHF Symptoms at Rest"
                             />
                         }

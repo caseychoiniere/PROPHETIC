@@ -9,7 +9,7 @@ import MainStore from "../../stores/MainStore";
 @observer
 class TrialParticipation extends Component {
 
-    exclusionToggle = (exc) => MainStore.toggleExclusion(exc, false);
+    exclusionToggle = (input) => MainStore.toggleExclusion(input, false);
 
     render() {
         const { exclusions } = this.props;
@@ -19,8 +19,8 @@ class TrialParticipation extends Component {
                 <FormControlLabel
                     control={
                         <Switch
-                            checked={exclusions.has(Exc.prevTrial)}
-                            onChange={() => this.exclusionToggle(Exc.prevTrial)}
+                            checked={exclusions.has(Exc.Other_clinical_trial_participation[0])}
+                            onChange={() => this.exclusionToggle(Exc.Other_clinical_trial_participation[1])}
                             value="Participation in other clinical trial"
                         />
                     }

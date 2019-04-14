@@ -57,13 +57,14 @@ class Graph extends Component {
                 nice: false
             }
         };
+
         return (
             <Paper className={classes.content}>
                 { loading ? <CircularProgress color="secondary" size={80} className={classes.progress} /> :
                     <Chart height={400}
                            data={data}
                            scale={cols}
-                           padding={[20, 120, 95]}
+                           padding={['auto', 150, 'auto', 'auto']}
                            forceFit
                     >
                         <Tooltip showTitle={false}
@@ -81,6 +82,7 @@ class Graph extends Component {
                                     <Text
                                         key={obj.action}
                                         top={true}
+                                        width={40}
                                         position={{
                                             action: obj.action,
                                             percent: 'median'

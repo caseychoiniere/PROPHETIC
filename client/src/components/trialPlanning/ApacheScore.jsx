@@ -28,15 +28,15 @@ const styles = theme => ({
 @observer
 class ApacheScore extends Component {
 
-    waitForInput = debounce(value => MainStore.setExclusions(Exc.apache, {min: value[0], max: value[1]}), 280);
+    waitForInput = debounce(value => MainStore.setExclusions(Exc.APACHE_II_Score[1], {min: value[0], max: value[1]}), 280);
 
     exclusionToggle = (input) => MainStore.toggleExclusion(input, {min: 0, max: 71});
 
-    getApacheRange = () => {
+    getRange = () => {
         const { exclusions } = MainStore;
-        let apacheRange = {min: 0, max: 71};
-        if(exclusions.has(Exc.apache)) apacheRange = exclusions.get(Exc.apache).range;
-        return apacheRange;
+        let range = {min: 0, max: 71};
+        if(exclusions.has(Exc.APACHE_II_Score[0])) range = exclusions.get(Exc.APACHE_II_Score[0]).range;
+        return range;
     };
 
     setSliderRange = value => this.waitForInput(value);
@@ -49,16 +49,16 @@ class ApacheScore extends Component {
                 <FormControlLabel
                     control={
                         <Switch
-                            checked={exclusions.has(Exc.apache)}
-                            onChange={() => this.exclusionToggle(Exc.apache)}
+                            checked={exclusions.has(Exc.APACHE_II_Score[0])}
+                            onChange={() => this.exclusionToggle(Exc.APACHE_II_Score[1])}
                             value="Set Apache II Score Range"
                         />
                     }
                     label="Set Apache II Score Range"
                 />
-                <Collapse in={exclusions.has(Exc.apache)} classes={{wrapper: classes.wrapper}}>
+                <Collapse in={exclusions.has(Exc.APACHE_II_Score[0])} classes={{wrapper: classes.wrapper}}>
                         <Slider color="#bf4040"
-                                value={[this.getApacheRange().min, this.getApacheRange().max]}
+                                value={[this.getRange().min, this.getRange().max]}
                                 range
                                 max={71}
                                 onChangeComplete={this.setSliderRange}
@@ -66,7 +66,7 @@ class ApacheScore extends Component {
                         />
                         <TextField
                             disabled={true}
-                            value={`${this.getApacheRange().min} - ${this.getApacheRange().max}`}
+                            value={`${this.getRange().min} - ${this.getRange().max}`}
                             style={{width: 91, marginLeft: 10, marginTop: 7}}
                             InputProps={{
                                 disableUnderline: true,

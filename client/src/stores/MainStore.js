@@ -74,15 +74,19 @@ export class MainStore {
         this.showCookieConsent = !localStorage.getItem('cookie_consent');
     }
 
-    @action deleteExclusions(exc, value) {
-        let toDelete = [{e: exc, v: value}];
+    @action getRelatedExclusions(key) { // Removes exclusions that are only valid based on another exclusion e.g. Congestive_Heart_Failure & NYHA_Class_IV
         let related = [];
-        if(exc === Exc.HIV) related = [{e: Exc.CD4Count, v: false}];
-        if(exc === Exc.chf) related = [{e: Exc.nyha, v: false}];
-        toDelete.push(...related);
+        if(key === Exc.HIV_Infection[1]) related = [{e: Exc["CD4 Count"][0], k: Exc["CD4 Count"][1], v: {min: 0, max: 1000}}];
+        if(key === Exc.Congestive_Heart_Failure[1]) related = [{e: Exc.NYHA_Class_IV[0], k: Exc.NYHA_Class_IV[1], v: false}];
+        return related;
+    }
+
+    @action deleteExclusions(exc, key, value) {
+        let toDelete = [{e: exc, k: key, v: value}];
+        toDelete.push(...this.getRelatedExclusions(key));
         toDelete.forEach(i => {
             this.exclusions.delete(i.e);
-            this.data = this.filterData(i.e, i.v, false);
+            this.data = this.filterData(i.k, i.v, false);
         });
     }
 
@@ -107,7 +111,8 @@ export class MainStore {
     @action filterData(exclusion, value, remove = true) {
         let newData = [];
         if(remove) { // If removing items just filter the existing this.data array
-            if (typeof value === 'boolean') newData = this.data.filter(d => d[exclusion] === true);
+            if (typeof value === 'boolean') newData = this.data.filter(d => d[exclusion] === (true || null)); // Todo: How to handle null values? INCLUDE OR EXCLUDE
+            // if (typeof value === 'boolean') newData = this.data.filter(d => d[exclusion] !== (true || null)); // Todo: How to handle null values? INCLUDE OR EXCLUDE
             else newData = this.data.filter((d) => d[exclusion] >= value.min && d[exclusion] <= value.max);
         } else { // If adding items back in replace this.data by filtering original data array
             let filters = this.exclusions.values();
@@ -115,10 +120,14 @@ export class MainStore {
                 this.data = this.originalData;
                 for (let f of filters) {
                     let filtered;
-                    if (typeof f.range === 'boolean') filtered = [...this.data.filter(d => d[f.action] === true)];
-                    else filtered = [...this.data.filter((d) => d[f.action] >= f.range.min && d[f.action] <= f.range.max)];
+                    if (typeof f.range === 'boolean') {
+                        filtered = [...this.data.filter(d => d[f.key] === (true || null))];
+                    } else {
+                        // console.log(this.data.filter((d) => d[f.key] >= f.range.min && d[f.key] <= f.range.max).length);
+                        filtered = [...this.data.filter((d) => d[f.key] >= f.range.min && d[f.key] <= f.range.max)];
+                    }
                     this.data = filtered;
-                    this.exclusions.set(f.action, { action: f.action, pv:  filtered.length, range: typeof f.range !== 'boolean' && f.range});
+                    this.exclusions.set(f.action, { key: f.key, action: f.action, pv:  filtered.length, range: typeof f.range !== 'boolean' && f.range});
                     this.setGraphData();
                 }
                 return this.data;
@@ -158,10 +167,10 @@ export class MainStore {
                             .then((json) => {
                                 // If metadata is not defined just show the dataset without it
                                 if(!json.results.length ) {
-                                        mainStore.datasets.push({
-                                            id: d.id,
-                                            file: d
-                                        })
+                                    mainStore.datasets.push({
+                                        id: d.id,
+                                        file: d
+                                    })
                                 }
                                 datasets.map(d => {
                                     json.results.map(m => {
@@ -193,8 +202,8 @@ export class MainStore {
             .then(checkStatus)
             .then(response => response.json())
             .then((json) => {
-                this.data = json.trialdata;
-                this.originalData = json.trialdata;
+                this.data = json.patients;
+                this.originalData = json.patients;
                 this.graphData = [{
                     action: 'All Patients',
                     pv: this.data.length,
@@ -252,9 +261,9 @@ export class MainStore {
     @action setExclusions(exclusion, value) {
         if(typeof value === 'boolean') {
             this.data = this.filterData(exclusion, value);
-            this.exclusions.set(exclusion, { action: exclusion, pv: this.data.length, range: typeof value !== 'boolean' && value });
+            this.exclusions.set(Exc[exclusion][0], { key: exclusion, action: Exc[exclusion][0], pv: this.data.length, range: typeof value !== 'boolean' && value });
         } else {
-            this.exclusions.set(exclusion, { action: exclusion, pv: this.data.length, range: typeof value !== 'boolean' && value }); //By default ranges are maxed so they should initially return the same # of patients as the current filter
+            this.exclusions.set(Exc[exclusion][0], { key: exclusion, action: Exc[exclusion][0], pv: this.data.length, range: typeof value !== 'boolean' && value }); //By default ranges are maxed so they should initially return the same # of patients as the current filter
             this.data = this.filterData(exclusion, value, false);
         }
         if(typeof value === 'boolean') this.setGraphData(); // If not a bool, set graph data in filterData function
@@ -315,10 +324,10 @@ export class MainStore {
     }
 
     @action toggleExclusion(exc, value) {
-        if(!this.exclusions.has(exc)) {
+        if(!this.exclusions.has(Exc[exc][0])) {
             this.setExclusions(exc, value);
         } else {
-            this.deleteExclusions(exc, value);
+            this.deleteExclusions(Exc[exc][0], exc, value);
         }
     }
 
@@ -359,7 +368,7 @@ export class MainStore {
             if((t.id !== 'email' || t.id === 'email' &&
                 EmailValidator.validate(t.value.trim())) &&
                 ((text.length && (this.validationErrors.has(t.id))) ||
-                (!text.length && !this.validationErrors.has(t.id)))
+                    (!text.length && !this.validationErrors.has(t.id)))
             ) {
                 this.setValidationErrors(t.id);
             }

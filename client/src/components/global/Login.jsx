@@ -95,7 +95,7 @@ class Login extends Component {
                             variant="outlined"
                             disabled={loading}
                             onClick={this.login}>
-                        Please Login to Access Publicly Available Data
+                        Login
                     </Button>
                     {loading && <CircularProgress size={24} className={classes.progress} />}
                 </CardActions>
